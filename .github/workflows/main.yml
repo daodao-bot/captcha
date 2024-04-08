@@ -1,0 +1,36 @@
+name: Action
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      TZ: Asia/Shanghai
+      DOCKER_HUB_NAMESPACE: daodaobot
+      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+      DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      IMAGE_NAME: captcha
+      IMAGE_TAG: latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build with Docker
+        run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
+
+      - name: Login Docker Hub
+        run: docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
+
+      - name: Tag the Docker image
+        run: docker tag $IMAGE_NAME:$IMAGE_TAG $DOCKER_HUB_NAMESPACE/$IMAGE_NAME:$IMAGE_TAG
+
+      - name: Push the Docker Image
+        run: docker push $DOCKER_HUB_NAMESPACE/$IMAGE_NAME:$IMAGE_TAG
